@@ -1,0 +1,48 @@
+diff --git a/jira/bin/setenv.sh b/jira/bin/setenv.sh
+index 2c53c41..93190e6 100755
+--- a/jira/bin/setenv.sh
++++ b/jira/bin/setenv.sh
+@@ -1,3 +1,5 @@
++#!/bin/bash
++
+ #
+ # If the limit of files that Jira can open is too low, it will be set to this value.
+ #
+@@ -6,12 +8,13 @@ MIN_NOFILES_LIMIT=16384
+ #
+ # One way to set the JIRA HOME path is here via this variable.  Simply uncomment it and set a valid path like /jira/home.  You can of course set it outside in the command terminal.  That will also work.
+ #
+-#JIRA_HOME=""
++JIRA_HOME="/var/atlassian/application-data/jira"
++JIRA_CATALINA="/opt/atlassian/jira"
+ 
+ #
+ #  Occasionally Atlassian Support may recommend that you set some specific JVM arguments.  You can use this variable below to do that.
+ #
+-JVM_SUPPORT_RECOMMENDED_ARGS=""
++JVM_SUPPORT_RECOMMENDED_ARGS="-Datlassian.plugins.enable.wait=300 -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -XX:MaxRAMFraction=1"
+ 
+ #
+ #  You can use variable below to modify garbage collector settings.
+@@ -24,7 +27,7 @@ JVM_GC_ARGS="-XX:+ExplicitGCInvokesConcurrent"
+ #
+ # The following 2 settings control the minimum and maximum given to the JIRA Java virtual machine.  In larger JIRA instances, the maximum amount will need to be increased.
+ #
+-JVM_MINIMUM_MEMORY="384m"
++JVM_MINIMUM_MEMORY="2048m"
+ JVM_MAXIMUM_MEMORY="2048m"
+ 
+ #
+diff --git a/jira/conf/server.xml b/jira/conf/server.xml
+index 0a5cb30..0d628ad 100644
+--- a/jira/conf/server.xml
++++ b/jira/conf/server.xml
+@@ -35,6 +35,8 @@
+         <Connector port="8080" relaxedPathChars="[]|" relaxedQueryChars="[]|{}^&#x5c;&#x60;&quot;&lt;&gt;"
+                    maxThreads="150" minSpareThreads="25" connectionTimeout="20000" enableLookups="false"
+                    maxHttpHeaderSize="8192" protocol="HTTP/1.1" useBodyEncodingForURI="true" redirectPort="8443"
++                   proxyName="" proxyPort=""
++                   scheme="http" secure="false"
+                    acceptCount="100" disableUploadTimeout="true" bindOnInit="false"/>
+ 
+         <!--
