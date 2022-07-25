@@ -1,16 +1,16 @@
 ----------------------------------------------
-Jira 8.20.11-#820011 README
+Jira 9.0.0-#900003 README
 ----------------------------------------------
 
-Thank you for downloading Jira 8.20.11. This distribution comes with a
-built-in Tomcat 8.5.78 application server, so it runs (almost)
+Thank you for downloading Jira 9.0.0. This distribution comes with a
+built-in Tomcat 9.0.62 application server, so it runs (almost)
 out of the box.
 
 BRIEF INSTALL GUIDE
 -------------------
 
 Full documentation:
-http://docs.atlassian.com/jira/jadm-docs-0820/Installing+Jira+applications
+http://docs.atlassian.com/jira/jadm-docs-090/Installing+Jira+applications
 
 1. Install Oracle's Java Development Kit (JDK) or Java Runtime
    Environment (JRE) 8, or AdoptOpenJDK 8.
@@ -21,12 +21,12 @@ http://docs.atlassian.com/jira/jadm-docs-0820/Installing+Jira+applications
 2. Set the JAVA_HOME variable to where you installed Java.
 
    See the following instructions for details:
-   http://docs.atlassian.com/jira/jadm-docs-0820/Installing+Java
+   http://docs.atlassian.com/jira/jadm-docs-090/Installing+Java
 
 3. Set your Jira home directory.
 
    See the following instructions for details:
-   http://docs.atlassian.com/jira/jadm-docs-0820/Setting+your+Jira+application+home+directory
+   http://docs.atlassian.com/jira/jadm-docs-090/Setting+your+Jira+application+home+directory
 
 4. Start Jira by running one of the following files:
    (Windows) 'bin\start-jira.bat'
@@ -43,7 +43,7 @@ You can reconnect your existing database and Jira home directory to this
 instance, and start using Jira in a new version.
 
 Full documentation:
-http://docs.atlassian.com/jira/jadm-docs-0820/Upgrading+Jira+applications
+http://docs.atlassian.com/jira/jadm-docs-090/Upgrading+Jira+applications
 
 Before you begin:
 
@@ -51,20 +51,20 @@ Before you begin:
    checking app compatibility, and backing up your Jira instance.
 
    See the following instructions for details:
-   http://docs.atlassian.com/jira/jadm-docs-0820/Preparing+for+the+upgrade
+   http://docs.atlassian.com/jira/jadm-docs-090/Preparing+for+the+upgrade
 
 1. Stop your existing Jira instance.
 
 2. Set your Jira home directory.
 
    See the following instructions for details:
-   http://docs.atlassian.com/jira/jadm-docs-0820/Setting+your+Jira+application+home+directory
+   http://docs.atlassian.com/jira/jadm-docs-090/Setting+your+Jira+application+home+directory
 
 3. If you're using an Oracle or MySQL database, download the database driver
    and place it in <this-directory>/lib.
 
    Supported drivers:
-   http://docs.atlassian.com/jira/jadm-docs-0820/Supported+platforms
+   http://docs.atlassian.com/jira/jadm-docs-090/Supported+platforms
 
 4. Re-apply any modifications you've made to Jira files in your previous
    version. These may include JVM arguments, connection settings, memory
@@ -99,7 +99,7 @@ QUESTIONS?
 ----------
 
 Try the docs at:
-http://docs.atlassian.com/jira/jadm-docs-0820/
+http://docs.atlassian.com/jira/jadm-docs-090/
 
 or ask at Atlassian Community:
 https://community.atlassian.com/
