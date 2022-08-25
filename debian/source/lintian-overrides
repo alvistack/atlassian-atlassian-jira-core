@@ -1,0 +1,4 @@
+atlassian-jira-core source: license-problem-json-evil
+atlassian-jira-core source: no-debian-changes
+atlassian-jira-core source: source-contains-prebuilt-windows-binary
+atlassian-jira-core source: source-is-missing

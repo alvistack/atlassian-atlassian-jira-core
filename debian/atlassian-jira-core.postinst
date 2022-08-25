@@ -1,0 +1,12 @@
+#!/bin/bash
+
+set -euxo pipefail
+
+JIRA_CATALINA=/opt/atlassian/jira
+
+chown -Rf jira:jira $JIRA_CATALINA
+chmod 0700 $JIRA_CATALINA
+
+#DEBHELPER#
+
+exit 0
