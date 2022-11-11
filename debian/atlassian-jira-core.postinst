@@ -1,0 +1,32 @@
+#!/bin/bash
+
+set -euxo pipefail
+
+JIRA_DOWNLOAD_URL=http://product-downloads.atlassian.com/software/jira/downloads/atlassian-jira-core-9.2.0.tar.gz
+JIRA_DOWNLOAD_DEST=/tmp/atlassian-jira-core-9.2.0.tar.gz
+JIRA_DOWNLOAD_CHECKSUM=a9fe4623625baafb473d3a48547b213f9d1810858df78bf96da8669de0e66381
+
+JIRA_CATALINA=/opt/atlassian/jira
+
+wget -c $JIRA_DOWNLOAD_URL -O $JIRA_DOWNLOAD_DEST
+echo -n "$JIRA_DOWNLOAD_CHECKSUM $JIRA_DOWNLOAD_DEST" | sha256sum -c -
+
+mkdir -p $JIRA_CATALINA
+find $JIRA_CATALINA -mindepth 1 | grep -v atlassian-jira-core.patch | xargs rm -rf || echo $?
+tar zxf $JIRA_DOWNLOAD_DEST -C $JIRA_CATALINA --strip-components=1
+
+cat $JIRA_CATALINA/atlassian-jira-core.patch | patch -p1
+chmod a+x $JIRA_CATALINA/bin/start-jira.sh
+chmod a+x $JIRA_CATALINA/bin/stop-jira.sh
+find $JIRA_CATALINA -type f -name '*.so' -exec chrpath -d {} \;
+find $JIRA_CATALINA -type f -name '*.bak' -delete
+find $JIRA_CATALINA -type f -name '*.orig' -delete
+find $JIRA_CATALINA -type f -name '*.rej' -delete
+fdupes -qnrps $JIRA_CATALINA
+
+chown -Rf jira:jira $JIRA_CATALINA
+chmod 0700 $JIRA_CATALINA
+
+#DEBHELPER#
+
+exit 0
