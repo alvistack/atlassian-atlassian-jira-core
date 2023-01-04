@@ -1,0 +1,32 @@
+#!/bin/bash
+
+set -euxo pipefail
+
+JIRA_HOME=/var/atlassian/application-data/jira
+
+if [ ! -d $JIRA_HOME -a ! -L $JIRA_HOME ]; then
+    mkdir -p $JIRA_HOME
+fi
+
+if ! getent group jira >/dev/null; then
+    groupadd \
+        --system \
+        jira
+fi
+
+if ! getent passwd jira >/dev/null; then
+    useradd \
+        --system \
+        --gid jira \
+        --home-dir $JIRA_HOME \
+        --no-create-home \
+        --shell /usr/sbin/nologin \
+        jira
+fi
+
+chown -Rf jira:jira $JIRA_HOME
+chmod 0750 $JIRA_HOME
+
+#DEBHELPER#
+
+exit 0
