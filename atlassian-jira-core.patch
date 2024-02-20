@@ -1,0 +1,92 @@
+diff --git a/opt/atlassian/jira/bin/setenv.sh b/opt/atlassian/jira/bin/setenv.sh
+index 7028ed0..2e80508 100755
+--- a/opt/atlassian/jira/bin/setenv.sh
++++ b/opt/atlassian/jira/bin/setenv.sh
+@@ -1,3 +1,5 @@
++#!/bin/bash
++
+ #
+ # If the limit of files that Jira can open is too low, it will be set to this value.
+ #
+@@ -6,12 +8,13 @@ MIN_NOFILES_LIMIT=16384
+ #
+ # One way to set the JIRA HOME path is here via this variable.  Simply uncomment it and set a valid path like /jira/home.  You can of course set it outside in the command terminal.  That will also work.
+ #
+-#JIRA_HOME=""
++JIRA_HOME="/var/atlassian/application-data/jira"
++JIRA_CATALINA="/opt/atlassian/jira"
+ 
+ #
+ #  Occasionally Atlassian Support may recommend that you set some specific JVM arguments.  You can use this variable below to do that.
+ #
+-JVM_SUPPORT_RECOMMENDED_ARGS=""
++JVM_SUPPORT_RECOMMENDED_ARGS="-Datlassian.plugins.enable.wait=300 -XX:+IgnoreUnrecognizedVMOptions -XX:+UnlockExperimentalVMOptions"
+ 
+ #
+ #  You can use variable below to modify garbage collector settings.
+@@ -19,18 +22,18 @@ JVM_SUPPORT_RECOMMENDED_ARGS=""
+ #  For Java 11 and relatively small heaps we recommend: -XX:+UseParallelGC
+ #  For Java 11 and larger heaps we recommend: -XX:+UseG1GC -XX:+ExplicitGCInvokesConcurrent
+ #
+-JVM_GC_ARGS="-XX:+ExplicitGCInvokesConcurrent"
++JVM_GC_ARGS="-XX:+UseZGC -XX:ZCollectionInterval=5 -XX:ZAllocationSpikeTolerance=5 -XX:+ExplicitGCInvokesConcurrent"
+ 
+ #
+ # The following 2 settings control the minimum and maximum given to the JIRA Java virtual machine.  In larger JIRA instances, the maximum amount will need to be increased.
+ #
+-JVM_MINIMUM_MEMORY="384m"
++JVM_MINIMUM_MEMORY="2048m"
+ JVM_MAXIMUM_MEMORY="2048m"
+ 
+ #
+ # The following setting configures the size of JVM code cache.  A high value of reserved size allows Jira to work with more installed apps.
+ #
+-JVM_CODE_CACHE_ARGS='-XX:InitialCodeCacheSize=32m -XX:ReservedCodeCacheSize=512m'
++JVM_CODE_CACHE_ARGS='-XX:ReservedCodeCacheSize=512m'
+ 
+ #
+ # The following are the required arguments for Jira.
+@@ -74,6 +77,15 @@ if [ "$JIRA_HOME" != "" ]; then
+     fi
+ fi
+ 
++CATALINA_OPTS="-Djira.catalina.connector.port=8080 ${CATALINA_OPTS}"
++CATALINA_OPTS="-Djira.catalina.connector.scheme=http ${CATALINA_OPTS}"
++CATALINA_OPTS="-Djira.catalina.connector.secure=false ${CATALINA_OPTS}"
++CATALINA_OPTS="-Djira.catalina.connector.proxyname= ${CATALINA_OPTS}"
++CATALINA_OPTS="-Djira.catalina.connector.proxyport= ${CATALINA_OPTS}"
++CATALINA_OPTS="-Djira.catalina.context.path= ${CATALINA_OPTS}"
++
++export CATALINA_OPTS
++
+ # DO NOT remove the following line
+ # !INSTALLER SET JAVA_HOME
+ 
+diff --git a/opt/atlassian/jira/conf/server.xml b/opt/atlassian/jira/conf/server.xml
+index 0a5cb30..aefc123 100644
+--- a/opt/atlassian/jira/conf/server.xml
++++ b/opt/atlassian/jira/conf/server.xml
+@@ -32,10 +32,12 @@
+         -->
+ 
+         <!-- Relaxing chars because of JRASERVER-67974 -->
+-        <Connector port="8080" relaxedPathChars="[]|" relaxedQueryChars="[]|{}^&#x5c;&#x60;&quot;&lt;&gt;"
++        <Connector port="${jira.catalina.connector.port}" relaxedPathChars="[]|" relaxedQueryChars="[]|{}^&#x5c;&#x60;&quot;&lt;&gt;"
+                    maxThreads="150" minSpareThreads="25" connectionTimeout="20000" enableLookups="false"
+                    maxHttpHeaderSize="8192" protocol="HTTP/1.1" useBodyEncodingForURI="true" redirectPort="8443"
+-                   acceptCount="100" disableUploadTimeout="true" bindOnInit="false"/>
++                   acceptCount="100" disableUploadTimeout="true" bindOnInit="false"
++                   scheme="${jira.catalina.connector.scheme}" secure="${jira.catalina.connector.secure}"
++                   proxyName="${jira.catalina.connector.proxyname}" proxyPort="${jira.catalina.connector.proxyport}"/>
+ 
+         <!--
+          ==============================================================================================================
+@@ -99,7 +101,7 @@
+         <Engine name="Catalina" defaultHost="localhost">
+             <Host name="localhost" appBase="webapps" unpackWARs="true" autoDeploy="true">
+ 
+-                <Context path="" docBase="${catalina.home}/atlassian-jira" reloadable="false" useHttpOnly="true">
++                <Context path="${jira.catalina.context.path}" docBase="${catalina.home}/atlassian-jira" reloadable="false" useHttpOnly="true">
+                     <Resource name="UserTransaction" auth="Container" type="javax.transaction.UserTransaction"
+                               factory="org.objectweb.jotm.UserTransactionFactory" jotm.timeout="60"/>
+                     <Manager pathname=""/>
