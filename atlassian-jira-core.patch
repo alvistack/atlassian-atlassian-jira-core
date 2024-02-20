@@ -1,0 +1,143 @@
+diff --git a/opt/atlassian/jira/atlassian-jira/WEB-INF/web.xml b/opt/atlassian/jira/atlassian-jira/WEB-INF/web.xml
+index 90343326..32882e6e 100644
+--- a/opt/atlassian/jira/atlassian-jira/WEB-INF/web.xml
++++ b/opt/atlassian/jira/atlassian-jira/WEB-INF/web.xml
+@@ -1,10 +1,9 @@
+ <?xml version="1.0"?>
+-<web-app xmlns="http://java.sun.com/xml/ns/javaee"
++<web-app xmlns="https://jakarta.ee/xml/ns/jakartaee"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+-         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
+-                http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+-         version="3.0"
+-         metadata-complete="true">
++         xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee
++                      https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd"
++         version="6.0">
+     <!-- General -->
+     <display-name>Atlassian JIRA Web Application</display-name>
+     <description>The Atlassian JIRA web application - see http://www.atlassian.com/software/jira for more information
+diff --git a/opt/atlassian/jira/bin/setenv.sh b/opt/atlassian/jira/bin/setenv.sh
+index 012751b2..14925128 100755
+--- a/opt/atlassian/jira/bin/setenv.sh
++++ b/opt/atlassian/jira/bin/setenv.sh
+@@ -1,3 +1,5 @@
++#!/bin/bash
++
+ #
+ # If the limit of files that Jira can open is too low, it will be set to this value.
+ #
+@@ -6,12 +8,13 @@ MIN_NOFILES_LIMIT=16384
+ #
+ # One way to set the JIRA HOME path is here via this variable.  Simply uncomment it and set a valid path like /jira/home.  You can of course set it outside in the command terminal.  That will also work.
+ #
+-#JIRA_HOME=""
++JIRA_HOME="/var/atlassian/application-data/jira"
++JIRA_CATALINA="/opt/atlassian/jira"
+ 
+ #
+ #  Occasionally Atlassian Support may recommend that you set some specific JVM arguments.  You can use this variable below to do that.
+ #
+-JVM_SUPPORT_RECOMMENDED_ARGS=""
++JVM_SUPPORT_RECOMMENDED_ARGS="-Datlassian.plugins.enable.wait=300 -XX:+IgnoreUnrecognizedVMOptions -XX:+UnlockExperimentalVMOptions"
+ 
+ #
+ #  You can use variable below to modify garbage collector settings.
+@@ -19,18 +22,18 @@ JVM_SUPPORT_RECOMMENDED_ARGS=""
+ #  For Java 11 and relatively small heaps we recommend: -XX:+UseParallelGC
+ #  For Java 11 and larger heaps we recommend: -XX:+UseG1GC -XX:+ExplicitGCInvokesConcurrent
+ #
+-JVM_GC_ARGS="-XX:+ExplicitGCInvokesConcurrent"
++JVM_GC_ARGS="-XX:+UseZGC -XX:ZCollectionInterval=5 -XX:ZAllocationSpikeTolerance=5 -XX:+ExplicitGCInvokesConcurrent"
+ 
+ #
+ # The following 2 settings control the minimum and maximum given to the JIRA Java virtual machine.  In larger JIRA instances, the maximum amount will need to be increased.
+ #
+-JVM_MINIMUM_MEMORY="384m"
++JVM_MINIMUM_MEMORY="2048m"
+ JVM_MAXIMUM_MEMORY="2048m"
+ 
+ #
+ # The following setting configures the size of JVM code cache.  A high value of reserved size allows Jira to work with more installed apps.
+ #
+-JVM_CODE_CACHE_ARGS='-XX:InitialCodeCacheSize=32m -XX:ReservedCodeCacheSize=512m'
++JVM_CODE_CACHE_ARGS='-XX:ReservedCodeCacheSize=512m'
+ 
+ #
+ # The following are the required arguments for Jira.
+@@ -74,6 +77,15 @@ if [ "$JIRA_HOME" != "" ]; then
+     fi
+ fi
+ 
++CATALINA_OPTS="-Djira.catalina.connector.port=8080 ${CATALINA_OPTS}"
++CATALINA_OPTS="-Djira.catalina.connector.scheme=http ${CATALINA_OPTS}"
++CATALINA_OPTS="-Djira.catalina.connector.secure=false ${CATALINA_OPTS}"
++CATALINA_OPTS="-Djira.catalina.connector.proxyname= ${CATALINA_OPTS}"
++CATALINA_OPTS="-Djira.catalina.connector.proxyport= ${CATALINA_OPTS}"
++CATALINA_OPTS="-Djira.catalina.context.path= ${CATALINA_OPTS}"
++
++export CATALINA_OPTS
++
+ # DO NOT remove the following line
+ # !INSTALLER SET JAVA_HOME
+ 
+diff --git a/opt/atlassian/jira/conf/server.xml b/opt/atlassian/jira/conf/server.xml
+index 0a5cb306..aefc1233 100644
+--- a/opt/atlassian/jira/conf/server.xml
++++ b/opt/atlassian/jira/conf/server.xml
+@@ -32,10 +32,12 @@
+         -->
+ 
+         <!-- Relaxing chars because of JRASERVER-67974 -->
+-        <Connector port="8080" relaxedPathChars="[]|" relaxedQueryChars="[]|{}^&#x5c;&#x60;&quot;&lt;&gt;"
++        <Connector port="${jira.catalina.connector.port}" relaxedPathChars="[]|" relaxedQueryChars="[]|{}^&#x5c;&#x60;&quot;&lt;&gt;"
+                    maxThreads="150" minSpareThreads="25" connectionTimeout="20000" enableLookups="false"
+                    maxHttpHeaderSize="8192" protocol="HTTP/1.1" useBodyEncodingForURI="true" redirectPort="8443"
+-                   acceptCount="100" disableUploadTimeout="true" bindOnInit="false"/>
++                   acceptCount="100" disableUploadTimeout="true" bindOnInit="false"
++                   scheme="${jira.catalina.connector.scheme}" secure="${jira.catalina.connector.secure}"
++                   proxyName="${jira.catalina.connector.proxyname}" proxyPort="${jira.catalina.connector.proxyport}"/>
+ 
+         <!--
+          ==============================================================================================================
+@@ -99,7 +101,7 @@
+         <Engine name="Catalina" defaultHost="localhost">
+             <Host name="localhost" appBase="webapps" unpackWARs="true" autoDeploy="true">
+ 
+-                <Context path="" docBase="${catalina.home}/atlassian-jira" reloadable="false" useHttpOnly="true">
++                <Context path="${jira.catalina.context.path}" docBase="${catalina.home}/atlassian-jira" reloadable="false" useHttpOnly="true">
+                     <Resource name="UserTransaction" auth="Container" type="javax.transaction.UserTransaction"
+                               factory="org.objectweb.jotm.UserTransactionFactory" jotm.timeout="60"/>
+                     <Manager pathname=""/>
+diff --git a/opt/atlassian/jira/conf/web.xml b/opt/atlassian/jira/conf/web.xml
+index 03616bbd..225fb760 100644
+--- a/opt/atlassian/jira/conf/web.xml
++++ b/opt/atlassian/jira/conf/web.xml
+@@ -15,11 +15,11 @@
+   See the License for the specific language governing permissions and
+   limitations under the License.
+ -->
+-<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
++<web-app xmlns="https://jakarta.ee/xml/ns/jakartaee"
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+-  xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee
+-                      http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd"
+-  version="4.0">
++  xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee
++                      https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd"
++  version="6.0">
+ 
+   <!-- ======================== Introduction ============================== -->
+   <!-- This document defines default values for *all* web applications      -->
+@@ -32,6 +32,11 @@
+   <!-- They should go in the "/WEB-INF/web.xml" file in your application.   -->
+ 
+ 
++  <!-- Set the default request and response character encodings to UTF-8.   -->
++  <request-character-encoding>UTF-8</request-character-encoding>
++  <response-character-encoding>UTF-8</response-character-encoding>
++
++
+   <!-- ================== Built In Servlet Definitions ==================== -->
+ 
+ 
