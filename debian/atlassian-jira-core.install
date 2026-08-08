@@ -1,0 +1,2 @@
+usr/lib/systemd/system/jira.service
+opt/atlassian/atlassian-jira-core.patch
