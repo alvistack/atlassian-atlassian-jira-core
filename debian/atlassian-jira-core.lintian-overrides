@@ -1,0 +1,17 @@
+atlassian-jira-core: classpath-contains-relative-path
+atlassian-jira-core: codeless-jar
+atlassian-jira-core: copyright-without-copyright-notice
+atlassian-jira-core: description-is-pkg-name
+atlassian-jira-core: dir-or-file-in-opt
+atlassian-jira-core: embedded-javascript-library
+atlassian-jira-core: executable-not-elf-or-script
+atlassian-jira-core: initial-upload-closes-no-bugs
+atlassian-jira-core: jar-contains-source
+atlassian-jira-core: jar-not-in-usr-share
+atlassian-jira-core: national-encoding
+atlassian-jira-core: non-standard-dir-in-var
+atlassian-jira-core: privacy-breach-google-adsense
+atlassian-jira-core: shell-script-fails-syntax-check
+atlassian-jira-core: unknown-java-class-version
+atlassian-jira-core: virtual-package-depends-without-real-package-depends
+atlassian-jira-core: zero-byte-file-in-doc-directory
